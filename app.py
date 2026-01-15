@@ -56,101 +56,132 @@ answers = [
 # --- STREAMLIT UI SETUP ---
 st.set_page_config(page_title="Book of Answers", page_icon="📖")
 
-# Custom CSS for magical starry night theme
+# Custom CSS with working animations
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;600&display=swap');
     
-    /* Background and Stars */
+    /* Main App Background */
     .stApp {
-        background: linear-gradient(to bottom, #000000 0%, #0a0e27 50%, #1a1a2e 100%);
+        background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
         color: #FAFAFA;
-        overflow: hidden;
         position: relative;
     }
     
-    /* Starfield Container */
+    /* Stars Background Layer */
     .stApp::before {
-        content: '';
+        content: "";
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
+        background-image: 
+            radial-gradient(2px 2px at 20px 30px, white, transparent),
+            radial-gradient(2px 2px at 60px 70px, white, transparent),
+            radial-gradient(1px 1px at 50px 50px, white, transparent),
+            radial-gradient(1px 1px at 130px 80px, white, transparent),
+            radial-gradient(2px 2px at 90px 10px, white, transparent),
+            radial-gradient(1px 1px at 10px 100px, white, transparent),
+            radial-gradient(2px 2px at 150px 150px, white, transparent),
+            radial-gradient(1px 1px at 180px 20px, white, transparent),
+            radial-gradient(2px 2px at 40px 140px, white, transparent),
+            radial-gradient(1px 1px at 110px 110px, white, transparent);
+        background-size: 200px 200px;
+        background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+        animation: twinkle 5s ease-in-out infinite;
         pointer-events: none;
         z-index: 0;
+        opacity: 0.8;
     }
     
-    /* Twinkling Stars */
+    .stApp::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(1px 1px at 100px 120px, rgba(255,255,255,0.8), transparent),
+            radial-gradient(2px 2px at 160px 90px, rgba(255,255,255,0.9), transparent),
+            radial-gradient(1px 1px at 30px 160px, rgba(255,255,255,0.7), transparent),
+            radial-gradient(2px 2px at 190px 30px, rgba(255,255,255,0.8), transparent),
+            radial-gradient(1px 1px at 70px 180px, rgba(255,255,255,0.6), transparent);
+        background-size: 200px 200px;
+        background-position: 0 0, 60px 40px, 100px 200px;
+        animation: twinkle-reverse 4s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.9;
+    }
+    
     @keyframes twinkle {
-        0%, 100% { opacity: 0.3; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.2); }
+        0%, 100% { opacity: 0.8; }
+        50% { opacity: 0.3; }
     }
     
-    @keyframes twinkle-slow {
-        0%, 100% { opacity: 0.5; }
-        50% { opacity: 1; }
-    }
-    
-    @keyframes twinkle-fast {
-        0%, 100% { opacity: 0.2; }
+    @keyframes twinkle-reverse {
+        0%, 100% { opacity: 0.3; }
         50% { opacity: 0.9; }
     }
     
-    /* Shooting Stars */
-    @keyframes shooting-star {
+    /* Shooting Star Animation */
+    @keyframes shooting {
         0% {
             transform: translateX(0) translateY(0);
             opacity: 1;
         }
+        70% {
+            opacity: 1;
+        }
         100% {
-            transform: translateX(-300px) translateY(300px);
+            transform: translateX(-500px) translateY(500px);
             opacity: 0;
         }
-    }
-    
-    .shooting-star {
-        position: fixed;
-        width: 2px;
-        height: 2px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
-        z-index: 1;
-        animation: shooting-star 1.5s linear;
-    }
-    
-    .shooting-star::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 80px;
-        height: 2px;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
-        transform: translateX(-80px);
     }
     
     /* Neon Title Animation */
     @keyframes neon-glow {
         0%, 100% { 
             color: #ff00ff;
-            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff1493;
+            text-shadow: 
+                0 0 10px #ff00ff,
+                0 0 20px #ff00ff,
+                0 0 30px #ff00ff,
+                0 0 40px #ff1493,
+                0 0 70px #ff1493;
         }
         25% { 
             color: #00ffff;
-            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00bfff;
+            text-shadow: 
+                0 0 10px #00ffff,
+                0 0 20px #00ffff,
+                0 0 30px #00ffff,
+                0 0 40px #00bfff,
+                0 0 70px #00bfff;
         }
         50% { 
             color: #ffff00;
-            text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00, 0 0 30px #ffff00, 0 0 40px #ffd700;
+            text-shadow: 
+                0 0 10px #ffff00,
+                0 0 20px #ffff00,
+                0 0 30px #ffff00,
+                0 0 40px #ffd700,
+                0 0 70px #ffd700;
         }
         75% { 
             color: #00ff00;
-            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #32cd32;
+            text-shadow: 
+                0 0 10px #00ff00,
+                0 0 20px #00ff00,
+                0 0 30px #00ff00,
+                0 0 40px #32cd32,
+                0 0 70px #32cd32;
         }
     }
     
+    /* Title Styling */
     h1 {
         font-family: 'Great Vibes', cursive !important;
         font-size: 3.5rem !important;
@@ -159,34 +190,38 @@ st.markdown("""
         margin-bottom: 1rem !important;
         position: relative;
         z-index: 10;
+        padding-top: 2rem;
     }
     
-    /* Subtitle styling */
-    .subtitle {
+    /* Subtitle */
+    [data-testid="stMarkdownContainer"] p {
         font-family: 'Cinzel', serif;
         font-size: 1.2rem;
         text-align: center;
         color: #d4af37;
         text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-        margin-bottom: 2rem;
         position: relative;
         z-index: 10;
     }
     
     /* Chat Input */
+    .stChatInput {
+        position: relative;
+        z-index: 10;
+    }
+    
     .stChatInput > div {
         background-color: rgba(38, 39, 48, 0.8) !important;
         border: 2px solid #d4af37 !important;
         border-radius: 15px !important;
         backdrop-filter: blur(10px);
-        position: relative;
-        z-index: 10;
     }
     
     .stChatInput input {
         font-family: 'Great Vibes', cursive !important;
         font-size: 1.3rem !important;
         color: #d4af37 !important;
+        background: transparent !important;
     }
     
     .stChatInput input::placeholder {
@@ -196,25 +231,13 @@ st.markdown("""
     
     /* Chat Messages */
     .stChatMessage {
-        background-color: rgba(38, 39, 48, 0.7) !important;
+        background-color: rgba(38, 39, 48, 0.85) !important;
         border: 1px solid rgba(212, 175, 55, 0.3) !important;
         border-radius: 15px !important;
         backdrop-filter: blur(10px);
         position: relative;
         z-index: 10;
-    }
-    
-    /* Answer Card */
-    .answer-card {
-        padding: 25px;
-        border-radius: 15px;
-        background: linear-gradient(135deg, rgba(38, 39, 48, 0.9) 0%, rgba(26, 26, 46, 0.9) 100%);
-        border: 2px solid #d4af37;
-        text-align: center;
-        margin: 20px 0;
-        box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
-        position: relative;
-        z-index: 10;
+        margin: 10px 0;
     }
     
     /* Spinner */
@@ -222,79 +245,22 @@ st.markdown("""
         border-top-color: #d4af37 !important;
     }
     
-    /* All text elements */
-    div[data-testid="stChatMessageContent"] {
+    /* Make sure content is visible */
+    [data-testid="stChatMessageContent"] {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Block container */
+    .block-container {
         position: relative;
         z-index: 10;
     }
 </style>
-
-<script>
-// Create starfield
-function createStars() {
-    const container = document.querySelector('.stApp');
-    if (!container) return;
-    
-    // Create stars
-    for (let i = 0; i < 200; i++) {
-        const star = document.createElement('div');
-        const size = Math.random() * 3 + 1;
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
-        const duration = Math.random() * 3 + 2;
-        const delay = Math.random() * 5;
-        const animations = ['twinkle', 'twinkle-slow', 'twinkle-fast'];
-        const animation = animations[Math.floor(Math.random() * animations.length)];
-        
-        star.style.cssText = `
-            position: fixed;
-            width: ${size}px;
-            height: ${size}px;
-            background: white;
-            border-radius: 50%;
-            left: ${x}%;
-            top: ${y}%;
-            box-shadow: 0 0 ${size * 2}px ${size / 2}px rgba(255, 255, 255, 0.8);
-            animation: ${animation} ${duration}s infinite;
-            animation-delay: ${delay}s;
-            z-index: 1;
-            pointer-events: none;
-        `;
-        container.appendChild(star);
-    }
-}
-
-// Create shooting stars
-function createShootingStar() {
-    const container = document.querySelector('.stApp');
-    if (!container) return;
-    
-    const star = document.createElement('div');
-    star.className = 'shooting-star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 50 + '%';
-    container.appendChild(star);
-    
-    setTimeout(() => star.remove(), 1500);
-}
-
-// Initialize
-setTimeout(() => {
-    createStars();
-    
-    // Random shooting stars (1-5 every few seconds)
-    setInterval(() => {
-        const count = Math.floor(Math.random() * 5) + 1;
-        for (let i = 0; i < count; i++) {
-            setTimeout(() => createShootingStar(), Math.random() * 2000);
-        }
-    }, 3000);
-}, 100);
-</script>
 """, unsafe_allow_html=True)
 
 st.title("📖 𝓣𝓱𝓮 𝓑𝓸𝓸𝓴 𝓸𝓯 𝓐𝓷𝓼𝔀𝓮𝓻𝓼 / 答案之书")
-st.markdown("<div class='subtitle'>𝓕𝓸𝓬𝓾𝓼 𝓸𝓷 𝔂𝓸𝓾𝓻 𝓺𝓾𝓮𝓼𝓽𝓲𝓸𝓷... 请在心中默念你的问题... ✨</div>", unsafe_allow_html=True)
+st.markdown("**𝓕𝓸𝓬𝓾𝓼 𝓸𝓷 𝔂𝓸𝓾𝓻 𝓺𝓾𝓮𝓼𝓽𝓲𝓸𝓷... 请在心中默念你的问题... ✨**")
 
 # Initialize Chat History
 if "messages" not in st.session_state:
