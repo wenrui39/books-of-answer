@@ -4,9 +4,7 @@ import time
 from groq import Groq
 
 # --- CONFIGURATION ---
-# ⚠️ SECURITY NOTE: In a real app, use st.secrets or environment variables for API keys.
-# For now, we use the key you provided.
-
+# Attempt to load secrets, fallback for local testing
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except FileNotFoundError:
@@ -14,8 +12,164 @@ except FileNotFoundError:
     st.stop()
 
 client = Groq(api_key=GROQ_API_KEY)
-# --- EXPANDED ANSWER DATABASE (OPTIMIZED) ---
-# I have expanded this from 30 to 60+ answers covering various outcomes.
+# --- PAGE SETUP ---
+st.set_page_config(page_title="Book of Answers", page_icon="🌠", layout="wide")
+
+# --- CUSTOM CSS & ANIMATION ENGINE ---
+# We generate random positions for meteors using Python so they look different every reload
+meteor_html = ""
+for i in range(15):  # Create 15 meteors
+    top_pos = random.randint(0, 300) # Random vertical start
+    delay = random.uniform(0, 15)    # Random wait time
+    duration = random.uniform(2, 5)  # Random speed
+    left_pos = random.randint(0, 100)# Random horizontal start
+    meteor_html += f"""
+    <span class="meteor" style="top: {top_pos}px; left: {left_pos}%; animation-delay: {delay}s; animation-duration: {duration}s;"></span>
+    """
+
+st.markdown(f"""
+<style>
+    /* 1. IMPORT FONT (Cursive style to match your request) */
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Orbitron:wght@500&display=swap');
+
+    /* 2. BACKGROUND & STAR FIELD */
+    .stApp {{
+        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        overflow-x: hidden;
+    }}
+    
+    /* 3. GENERATING STARS (CSS Only - Performance Optimized) */
+    /* We use box-shadows to create hundreds of stars on a single pixel element */
+    .stars {{
+        width: 1px; height: 1px;
+        background: transparent;
+        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(700)])};
+        animation: animStar 50s linear infinite;
+    }}
+    .stars:after {{
+        content: " "; position: absolute; top: 2000px; width: 1px; height: 1px; background: transparent;
+        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(700)])};
+    }}
+    
+    .stars2 {{
+        width: 2px; height: 2px;
+        background: transparent;
+        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(200)])};
+        animation: animStar 100s linear infinite;
+    }}
+    
+    .stars3 {{
+        width: 3px; height: 3px;
+        background: transparent;
+        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(100)])};
+        animation: animStar 150s linear infinite;
+    }}
+
+    /* TWINKLING EFFECT */
+    @keyframes animStar {{
+        from {{ transform: translateY(0px); opacity: 0.8; }}
+        to {{ transform: translateY(-2000px); opacity: 1; }}
+    }}
+
+    /* 4. METEOR (SHOOTING STAR) STYLES */
+    .meteor {{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        height: 2px;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%); /* Trail */
+        opacity: 0;
+        transform: rotate(-45deg);
+        animation: meteor 5s linear infinite;
+    }}
+    
+    /* The glowing head of the meteor */
+    .meteor:before {{
+        content: "";
+        position: absolute;
+        width: 4px; height: 5px;
+        border-radius: 50%;
+        margin-top: -2px;
+        background: rgba(255, 255, 255, 0.7);
+        box-shadow: 0 0 15px 3px #fff;
+    }}
+
+    @keyframes meteor {{
+        0% {{ opacity: 0; transform: translateX(300px) translateY(-300px) rotate(-45deg); width: 0px; }}
+        10% {{ opacity: 1; width: 150px; }} /* Meteor appears */
+        20% {{ opacity: 0; width: 0px; transform: translateX(-300px) translateY(300px) rotate(-45deg); }} /* Meteor fades */
+        100% {{ opacity: 0; }}
+    }}
+
+    /* 5. NEON TITLE & TEXT STYLES */
+    .neon-title {{
+        font-family: 'Orbitron', sans-serif;
+        font-size: 60px;
+        text-align: center;
+        text-transform: uppercase;
+        color: #fff;
+        text-shadow:
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 20px #fff,
+            0 0 40px #0ff,
+            0 0 80px #0ff,
+            0 0 90px #0ff,
+            0 0 100px #0ff,
+            0 0 150px #0ff;
+        animation: neon-color-cycle 5s infinite alternate;
+    }}
+
+    @keyframes neon-color-cycle {{
+        0% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #f09, 0 0 80px #f09; }}
+        33% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #0ff, 0 0 80px #0ff; }}
+        66% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #0f0, 0 0 80px #0f0; }}
+        100% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #ff0, 0 0 80px #ff0; }}
+    }}
+
+    /* The 'Type something' instruction in cursive */
+    .instruction-text {{
+        font-family: 'Great Vibes', cursive;
+        font-size: 35px;
+        color: rgba(255, 255, 255, 0.8);
+        text-align: center;
+        margin-top: -20px;
+        margin-bottom: 30px;
+    }}
+    
+    /* UI Cleanup */
+    .stTextInput > label {{ display: none; }} /* Hide default label */
+    .stTextInput input {{
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        text-align: center;
+        font-family: 'Orbitron', sans-serif;
+    }}
+    .stChatInput textarea {{
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+    }}
+
+    /* Container for the background layers */
+    .background-container {{
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1;
+        pointer-events: none;
+    }}
+</style>
+
+<div class="background-container">
+    <div class="stars"></div>
+    <div class="stars2"></div>
+    <div class="stars3"></div>
+    {meteor_html}
+</div>
+""", unsafe_allow_html=True)
+
+# --- ANSWERS DATABASE ---
 answers = [
     # Positive / Affirmative
     "Yes / 是的", "Absolutely / 绝对是", "Count on it / 你可以指望它", "Do it / 去做吧",
@@ -56,34 +210,14 @@ answers = [
     "See it differently / 换个角度看", "Maybe / 也许"
 ]
 
-# --- STREAMLIT UI SETUP ---
-st.set_page_config(page_title="Book of Answers", page_icon="📖")
 
-# Custom CSS for the mystical vibe
-st.markdown("""
-<style>
-    .stApp {
-        background-color: #0E1117;
-        color: #FAFAFA;
-    }
-    .big-font {
-        font-size: 20px !important;
-        font-weight: bold;
-        color: #d4af37;
-    }
-    .answer-card {
-        padding: 20px;
-        border-radius: 10px;
-        background-color: #262730;
-        border: 1px solid #d4af37;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-</style>
-""", unsafe_allow_html=True)
+# --- UI CONTENT ---
 
-st.title("📖 The Book of Answers / 答案之书")
-st.markdown("Focus on your question. Hold it in your mind... <br>请在心中默念你的问题... 集中精神...", unsafe_allow_html=True)
+# 1. Neon Title
+st.markdown('<div class="neon-title">The Book of Answers / 答案之书</div>', unsafe_allow_html=True)
+
+# 2. Cursive Instruction (Matches your "Type something" request)
+st.markdown('<div class="instruction-text">Focus on your question. Hold it in your mind... / 请在心中默念你的问题... 集中精神...</div>', unsafe_allow_html=True)
 
 # Initialize Chat History
 if "messages" not in st.session_state:
