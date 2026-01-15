@@ -29,7 +29,7 @@ if 'css_code' not in locals():
     .stApp {
         background: transparent !important;
     }
-    header, footer, .stDeployButton {
+    header, .stDeployButton {
         display: none !important;
     }
     
@@ -43,7 +43,7 @@ if 'css_code' not in locals():
     #starry-section {
         position: fixed;
         inset: 0; /* Top/Left/Right/Bottom = 0 */
-        width: 100%;
+        width: 110vw;
         height: 100vh;
         background: linear-gradient(150deg, #0f172a, #1c1917); /* 原版深色渐变 */
         overflow: hidden;
@@ -317,7 +317,7 @@ if 'css_code' not in locals():
         display: flex !important;
         position: absolute !important;
         /* 【关键修改：距离调整】离右边框 20px，不再贴边 */
-        right: 20px !important; 
+        right: 50px !important; 
         top: 50% !important;
         transform: translateY(-50%) !important;
         
