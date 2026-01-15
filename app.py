@@ -253,42 +253,45 @@ if 'css_code' not in locals():
         50% { opacity: 1; transform: scale(1.05); }
     }
 
-    /* --- 6. CHAT INTERFACE BEAUTIFICATION --- */
-    /* 玻璃拟态输入框 */
-    .stChatInput {
-        position: fixed;
-        bottom: 50px;
-        width: 80%;
-        left: 10%;
-        z-index: 100;
-    }
+    /* --- 6. CHAT INTERFACE BEAUTIFICATION (FIXED) --- */
     
-    .stChatInput textarea {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 30px !important;
-        color: #fff !important;
-        font-family: 'Orbitron', sans-serif !important;
-        font-size: 1rem;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        transition: all 0.3s ease;
+    /* 1. 隐藏 Streamlit 底部容器原本的背景色 (去除黑色长方形) */
+    div[data-testid="stBottom"] {
+        background-color: transparent !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 
+    /* 2. 重置输入框容器，防止位置偏移 */
+    .stChatInput {
+        padding-bottom: 20px !important;
+    }
+
+    /* 3. 美化输入框本体 (修复文字挤压) */
+    .stChatInput textarea {
+        background-color: rgba(0, 0, 0, 0.5) !important; /* 半透明黑底 */
+        backdrop-filter: blur(10px); /* 毛玻璃 */
+        border: 1px solid rgba(0, 255, 255, 0.3) !important; /* 青色边框 */
+        border-radius: 25px !important;
+        color: #fff !important;
+        font-family: 'Orbitron', sans-serif !important;
+        
+        /* 关键修复：调整内边距，让文字不被挤压 */
+        padding: 10px 15px !important; 
+        line-height: 1.5 !important;
+    }
+
+    /* 鼠标悬停/选中时的效果 */
     .stChatInput textarea:focus {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid #00ffff !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+        background-color: rgba(0, 0, 0, 0.7) !important;
+        border-color: #00ffff !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
     }
     
-    /* 聊天气泡样式 */
-    .stChatMessage {
-        background-color: rgba(0, 0, 0, 0.6) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(5px);
-        border-radius: 15px;
-        margin-bottom: 10px;
+    /* 隐藏输入框右下角的字符计数器 (如果有的话，保持界面干净) */
+    div[data-testid="InputInstructions"] {
+        display: none;
     }
 </style>
 """
