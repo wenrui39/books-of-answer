@@ -17,7 +17,7 @@ st.set_page_config(page_title="The Book of Answers", page_icon="🌠", layout="w
 # --- 2. INJECT CSS (From Part 1) ---
 if 'css_code' not in locals():
     css_code = """<style>
-    /* --- 1. GLOBAL RESETS & FONTS (修复横向滚动条的核心) --- */
+    /* --- 1. GLOBAL RESETS & FONTS --- */
     @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,200;10..48,800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Great+Vibes&display=swap');
 
@@ -25,34 +25,18 @@ if 'css_code' not in locals():
         --animation-speed: 24s;
     }
 
-    /* 【关键修复】强制隐藏 X 轴溢出 */
-    html, body, .stApp {
-        overflow-x: hidden !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    /* 强制覆盖 Streamlit 默认样式，消除白边和滚动条 */
+    .stApp {
+        background: transparent !important;
     }
-    
     header, footer, .stDeployButton {
         display: none !important;
     }
     
+    /* 修复 Streamlit 的容器内边距干扰 */
     .block-container {
         padding: 0 !important;
         max-width: 100% !important;
-    }
-
-    /* --- 2. THE STARRY STAGE (背景容器) --- */
-    #starry-section {
-        position: fixed;
-        inset: 0;
-        /* 【关键修改】不要用 100vw，改用 100% 防止把页面撑宽 */
-        width: 100% !important; 
-        height: 100vh;
-        background: linear-gradient(150deg, #0f172a, #1c1917);
-        overflow: hidden !important; /* 锁死背景，任何星星飞出去都不许出现滚动条 */
-        z-index: -1;
-        perspective: 1000px;
     }
 
     /* --- 2. THE STARRY STAGE (背景容器) --- */
@@ -274,7 +258,7 @@ if 'css_code' not in locals():
     /* [1] 容器定位：绝对居中 */
     div[data-testid="stChatInput"] {
         position: fixed !important;
-        bottom: 30px !important; /* 稍微抬高一点，阴影更好看 */
+        bottom: 60px !important; /* 稍微抬高一点，阴影更好看 */
         left: 50% !important;
         transform: translateX(-50%) !important;
         width: 100% !important;
