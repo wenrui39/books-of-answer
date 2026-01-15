@@ -253,79 +253,85 @@ if 'css_code' not in locals():
         50% { opacity: 1; transform: scale(1.05); }
     }
 
-    /* --- 6. CHAT INTERFACE (OCD APPROVED: CLEAN, CENTERED, STABLE) --- */
+    /* --- 6. CHAT INTERFACE (FIXED POSITION & RECTANGULAR) --- */
 
-    /* [1] 根除所有背景干扰 (The Nuclear Option) */
-    /* 强制底部所有容器透明，去掉那个廉价的方形黑底 */
-    div[data-testid="stBottom"],
-    div[data-testid="stBottom"] > div,
-    div[data-testid="stChatInput"],
-    div[data-testid="stChatInput"] > div,
-    div[data-testid="stChatInput"] > div > div {
-        background-color: transparent !important;
+    /* [1] 容器定位：绝对居中，不再受 Streamlit 布局影响 */
+    div[data-testid="stChatInput"] {
+        position: fixed !important;
+        bottom: 50px !important; /* 距离底部的绝对距离 */
+        left: 50% !important;    /* 水平定位到一半 */
+        transform: translateX(-50%) !important; /* 向左回拉一半，实现完美居中 */
+        width: 100% !important;
+        max-width: 700px !important; /* 限制最大宽度，防止太长 */
+        z-index: 999 !important; /* 保证在最上层 */
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    /* 清除所有父级背景 */
+    div[data-testid="stBottom"], 
+    div[data-testid="stBottom"] > div {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
     }
 
-    /* [2] 输入框容器布局 (Centering) */
-    /* 让输入框不再占满全屏，而是居中 */
-    div[data-testid="stChatInput"] {
-        display: flex !important;
-        justify-content: center !important; /* 水平居中 */
-        padding-bottom: 50px !important; /* 距离底部抬高 */
-    }
-
-    div[data-testid="stChatInput"] > div {
-        width: 100% !important;
-        max-width: 650px !important; /* 【变短】：限制最大宽度 */
-        flex-grow: 0 !important;
-    }
-
-    /* [3] 胶囊本体设计 (The Capsule) */
+    /* [2] 输入框本体：高级方块风格 */
     .stChatInput textarea {
-        /* 【变粗】：增加高度和内边距 */
-        min-height: 60px !important; 
-        padding-top: 18px !important; /* 调整文字垂直居中 */
-        padding-bottom: 18px !important;
+        /* 【形状】：微圆角矩形 (Square with soft corners) */
+        border-radius: 12px !important; 
         
-        /* 形状与材质 */
-        border-radius: 40px !important; /* 完美的圆润度 */
-        background-color: rgba(20, 20, 20, 0.9) !important; /* 深邃的高级黑，不透光以免看到后面的星星 */
-        border: 1px solid rgba(255, 255, 255, 0.15) !important; /* 极细的高光边 */
-        color: #FFFFFF !important;
+        /* 【尺寸与间距】：解决文字贴边问题 */
+        min-height: 55px !important;
+        padding: 15px 50px 15px 20px !important; /* 上 右(留给按钮) 下 左 */
+        
+        /* 【颜色】：深邃黑灰 */
+        background-color: rgba(18, 18, 18, 0.95) !important;
+        color: #f0f0f0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        
+        /* 【阴影】：悬浮感 */
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+        
+        /* 字体 */
         font-family: 'Bricolage Grotesque', sans-serif !important;
-        font-size: 18px !important; /* 字体加大一点，更易读 */
-        letter-spacing: 0.5px;
-        
-        /* 阴影：增加悬浮感 */
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-        
-        /* 【禁止颤动】：移除所有可能导致布局变化的 transition */
-        transition: border-color 0.2s, box-shadow 0.2s !important; 
-        
-        /* 隐藏滚动条 */
-        overflow: hidden !important;
+        font-size: 16px !important;
+        line-height: 1.5 !important;
     }
 
-    /* [4] 交互状态 (Focus) */
+    /* [3] 交互状态 */
     .stChatInput textarea:focus {
-        background-color: rgba(10, 10, 10, 1) !important; /* 聚焦时更黑更实 */
-        border-color: rgba(100, 200, 255, 0.6) !important; /* 青蓝色微光 */
-        box-shadow: 0 0 20px rgba(100, 200, 255, 0.15), 0 10px 30px rgba(0,0,0,0.6) !important;
+        background-color: rgba(10, 10, 10, 1) !important;
+        border-color: rgba(0, 255, 255, 0.5) !important;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.1) !important;
     }
 
-    /* [5] 清理多余元素 */
-    /* 隐藏发送按钮 (保持极简) */
+    /* [4] 发送按钮：恢复显示并定位 */
     button[data-testid="stChatInputSubmitButton"] {
-        display: none !important;
+        display: flex !important; /* 恢复显示 */
+        position: absolute !important;
+        right: 15px !important; /* 靠右固定 */
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: transparent !important;
+        border: none !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        z-index: 1000 !important;
     }
-    /* 隐藏右下角字符数 */
+    
+    /* 鼠标移上去按钮变亮 */
+    button[data-testid="stChatInputSubmitButton"]:hover {
+        color: #00ffff !important;
+    }
+    
+    /* 隐藏多余的图标容器背景 */
+    div[data-testid="stChatInput"] > div {
+        background: transparent !important;
+        border: none !important;
+    }
+    
+    /* 隐藏右下角字符统计 */
     div[data-testid="InputInstructions"] {
-        display: none !important;
-    }
-    /* 隐藏输入框右上角的奇怪图标容器（如果有） */
-    div[data-testid="stChatInput"] svg {
         display: none !important;
     }
 </style>
