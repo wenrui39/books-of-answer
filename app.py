@@ -4,7 +4,6 @@ import time
 from groq import Groq
 
 # --- CONFIGURATION ---
-# Attempt to load secrets, fallback for local testing
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except FileNotFoundError:
@@ -12,171 +11,15 @@ except FileNotFoundError:
     st.stop()
 
 client = Groq(api_key=GROQ_API_KEY)
-# --- PAGE SETUP ---
-st.set_page_config(page_title="Book of Answers", page_icon="🌠", layout="wide")
 
-# --- CUSTOM CSS & ANIMATION ENGINE ---
-# We generate random positions for meteors using Python so they look different every reload
-meteor_html = ""
-for i in range(15):  # Create 15 meteors
-    top_pos = random.randint(0, 300) # Random vertical start
-    delay = random.uniform(0, 15)    # Random wait time
-    duration = random.uniform(2, 5)  # Random speed
-    left_pos = random.randint(0, 100)# Random horizontal start
-    meteor_html += f"""
-    <span class="meteor" style="top: {top_pos}px; left: {left_pos}%; animation-delay: {delay}s; animation-duration: {duration}s;"></span>
-    """
-
-st.markdown(f"""
-<style>
-    /* 1. IMPORT FONT (Cursive style to match your request) */
-    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Orbitron:wght@500&display=swap');
-
-    /* 2. BACKGROUND & STAR FIELD */
-    .stApp {{
-        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-        overflow-x: hidden;
-    }}
-    
-    /* 3. GENERATING STARS (CSS Only - Performance Optimized) */
-    /* We use box-shadows to create hundreds of stars on a single pixel element */
-    .stars {{
-        width: 1px; height: 1px;
-        background: transparent;
-        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(700)])};
-        animation: animStar 50s linear infinite;
-    }}
-    .stars:after {{
-        content: " "; position: absolute; top: 2000px; width: 1px; height: 1px; background: transparent;
-        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(700)])};
-    }}
-    
-    .stars2 {{
-        width: 2px; height: 2px;
-        background: transparent;
-        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(200)])};
-        animation: animStar 100s linear infinite;
-    }}
-    
-    .stars3 {{
-        width: 3px; height: 3px;
-        background: transparent;
-        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(100)])};
-        animation: animStar 150s linear infinite;
-    }}
-
-    /* TWINKLING EFFECT */
-    @keyframes animStar {{
-        from {{ transform: translateY(0px); opacity: 0.8; }}
-        to {{ transform: translateY(-2000px); opacity: 1; }}
-    }}
-
-    /* 4. METEOR (SHOOTING STAR) STYLES */
-    .meteor {{
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        height: 2px;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%); /* Trail */
-        opacity: 0;
-        transform: rotate(-45deg);
-        animation: meteor 5s linear infinite;
-    }}
-    
-    /* The glowing head of the meteor */
-    .meteor:before {{
-        content: "";
-        position: absolute;
-        width: 4px; height: 5px;
-        border-radius: 50%;
-        margin-top: -2px;
-        background: rgba(255, 255, 255, 0.7);
-        box-shadow: 0 0 15px 3px #fff;
-    }}
-
-    @keyframes meteor {{
-        0% {{ opacity: 0; transform: translateX(300px) translateY(-300px) rotate(-45deg); width: 0px; }}
-        10% {{ opacity: 1; width: 150px; }} /* Meteor appears */
-        20% {{ opacity: 0; width: 0px; transform: translateX(-300px) translateY(300px) rotate(-45deg); }} /* Meteor fades */
-        100% {{ opacity: 0; }}
-    }}
-
-    /* 5. NEON TITLE & TEXT STYLES */
-    .neon-title {{
-        font-family: 'Orbitron', sans-serif;
-        font-size: 60px;
-        text-align: center;
-        text-transform: uppercase;
-        color: #fff;
-        text-shadow:
-            0 0 5px #fff,
-            0 0 10px #fff,
-            0 0 20px #fff,
-            0 0 40px #0ff,
-            0 0 80px #0ff,
-            0 0 90px #0ff,
-            0 0 100px #0ff,
-            0 0 150px #0ff;
-        animation: neon-color-cycle 5s infinite alternate;
-    }}
-
-    @keyframes neon-color-cycle {{
-        0% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #f09, 0 0 80px #f09; }}
-        33% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #0ff, 0 0 80px #0ff; }}
-        66% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #0f0, 0 0 80px #0f0; }}
-        100% {{ text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #ff0, 0 0 80px #ff0; }}
-    }}
-
-    /* The 'Type something' instruction in cursive */
-    .instruction-text {{
-        font-family: 'Great Vibes', cursive;
-        font-size: 35px;
-        color: rgba(255, 255, 255, 0.8);
-        text-align: center;
-        margin-top: -20px;
-        margin-bottom: 30px;
-    }}
-    
-    /* UI Cleanup */
-    .stTextInput > label {{ display: none; }} /* Hide default label */
-    .stTextInput input {{
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 15px;
-        text-align: center;
-        font-family: 'Orbitron', sans-serif;
-    }}
-    .stChatInput textarea {{
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        color: white !important;
-    }}
-
-    /* Container for the background layers */
-    .background-container {{
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        z-index: -1;
-        pointer-events: none;
-    }}
-</style>
-
-<div class="background-container">
-    <div class="stars"></div>
-    <div class="stars2"></div>
-    <div class="stars3"></div>
-    {meteor_html}
-</div>
-""", unsafe_allow_html=True)
-
-# --- ANSWERS DATABASE ---
+# --- EXPANDED ANSWER DATABASE ---
 answers = [
     # Positive / Affirmative
     "Yes / 是的", "Absolutely / 绝对是", "Count on it / 你可以指望它", "Do it / 去做吧",
     "It is certain / 这是肯定的", "The outcome will surprise you / 结果会让你惊讶",
     "It is worth the struggle / 值得去争取", "This is a sure thing / 这是一个确定的事情",
     "Go for it / 试一试", "You will succeed / 你会成功的", "Luck is on your side / 幸运女神站在你这边",
-    "A definitive yes / 毫无疑问的“是”", "Signs point to yes / 迹象表明是肯定的",
+    "A definitive yes / 毫无疑问的"是"", "Signs point to yes / 迹象表明是肯定的",
     
     # Negative / Cautionary
     "No / 不", "Don't bet on it / 不要押注于此", "You will regret it / 你会后悔的",
@@ -210,14 +53,248 @@ answers = [
     "See it differently / 换个角度看", "Maybe / 也许"
 ]
 
+# --- STREAMLIT UI SETUP ---
+st.set_page_config(page_title="Book of Answers", page_icon="📖")
 
-# --- UI CONTENT ---
+# Custom CSS for magical starry night theme
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;600&display=swap');
+    
+    /* Background and Stars */
+    .stApp {
+        background: linear-gradient(to bottom, #000000 0%, #0a0e27 50%, #1a1a2e 100%);
+        color: #FAFAFA;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    /* Starfield Container */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    /* Twinkling Stars */
+    @keyframes twinkle {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.2); }
+    }
+    
+    @keyframes twinkle-slow {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+    
+    @keyframes twinkle-fast {
+        0%, 100% { opacity: 0.2; }
+        50% { opacity: 0.9; }
+    }
+    
+    /* Shooting Stars */
+    @keyframes shooting-star {
+        0% {
+            transform: translateX(0) translateY(0);
+            opacity: 1;
+        }
+        100% {
+            transform: translateX(-300px) translateY(300px);
+            opacity: 0;
+        }
+    }
+    
+    .shooting-star {
+        position: fixed;
+        width: 2px;
+        height: 2px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+        z-index: 1;
+        animation: shooting-star 1.5s linear;
+    }
+    
+    .shooting-star::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
+        transform: translateX(-80px);
+    }
+    
+    /* Neon Title Animation */
+    @keyframes neon-glow {
+        0%, 100% { 
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff1493;
+        }
+        25% { 
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00bfff;
+        }
+        50% { 
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00, 0 0 30px #ffff00, 0 0 40px #ffd700;
+        }
+        75% { 
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #32cd32;
+        }
+    }
+    
+    h1 {
+        font-family: 'Great Vibes', cursive !important;
+        font-size: 3.5rem !important;
+        text-align: center !important;
+        animation: neon-glow 8s infinite !important;
+        margin-bottom: 1rem !important;
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Subtitle styling */
+    .subtitle {
+        font-family: 'Cinzel', serif;
+        font-size: 1.2rem;
+        text-align: center;
+        color: #d4af37;
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Chat Input */
+    .stChatInput > div {
+        background-color: rgba(38, 39, 48, 0.8) !important;
+        border: 2px solid #d4af37 !important;
+        border-radius: 15px !important;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
+    }
+    
+    .stChatInput input {
+        font-family: 'Great Vibes', cursive !important;
+        font-size: 1.3rem !important;
+        color: #d4af37 !important;
+    }
+    
+    .stChatInput input::placeholder {
+        font-family: 'Great Vibes', cursive !important;
+        color: rgba(212, 175, 55, 0.5) !important;
+    }
+    
+    /* Chat Messages */
+    .stChatMessage {
+        background-color: rgba(38, 39, 48, 0.7) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: 15px !important;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Answer Card */
+    .answer-card {
+        padding: 25px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, rgba(38, 39, 48, 0.9) 0%, rgba(26, 26, 46, 0.9) 100%);
+        border: 2px solid #d4af37;
+        text-align: center;
+        margin: 20px 0;
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Spinner */
+    .stSpinner > div {
+        border-top-color: #d4af37 !important;
+    }
+    
+    /* All text elements */
+    div[data-testid="stChatMessageContent"] {
+        position: relative;
+        z-index: 10;
+    }
+</style>
 
-# 1. Neon Title
-st.markdown('<div class="neon-title">The Book of Answers / 答案之书</div>', unsafe_allow_html=True)
+<script>
+// Create starfield
+function createStars() {
+    const container = document.querySelector('.stApp');
+    if (!container) return;
+    
+    // Create stars
+    for (let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        const size = Math.random() * 3 + 1;
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const duration = Math.random() * 3 + 2;
+        const delay = Math.random() * 5;
+        const animations = ['twinkle', 'twinkle-slow', 'twinkle-fast'];
+        const animation = animations[Math.floor(Math.random() * animations.length)];
+        
+        star.style.cssText = `
+            position: fixed;
+            width: ${size}px;
+            height: ${size}px;
+            background: white;
+            border-radius: 50%;
+            left: ${x}%;
+            top: ${y}%;
+            box-shadow: 0 0 ${size * 2}px ${size / 2}px rgba(255, 255, 255, 0.8);
+            animation: ${animation} ${duration}s infinite;
+            animation-delay: ${delay}s;
+            z-index: 1;
+            pointer-events: none;
+        `;
+        container.appendChild(star);
+    }
+}
 
-# 2. Cursive Instruction (Matches your "Type something" request)
-st.markdown('<div class="instruction-text">Focus on your question. Hold it in your mind... / 请在心中默念你的问题... 集中精神...</div>', unsafe_allow_html=True)
+// Create shooting stars
+function createShootingStar() {
+    const container = document.querySelector('.stApp');
+    if (!container) return;
+    
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 50 + '%';
+    container.appendChild(star);
+    
+    setTimeout(() => star.remove(), 1500);
+}
+
+// Initialize
+setTimeout(() => {
+    createStars();
+    
+    // Random shooting stars (1-5 every few seconds)
+    setInterval(() => {
+        const count = Math.floor(Math.random() * 5) + 1;
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => createShootingStar(), Math.random() * 2000);
+        }
+    }, 3000);
+}, 100);
+</script>
+""", unsafe_allow_html=True)
+
+st.title("📖 𝓣𝓱𝓮 𝓑𝓸𝓸𝓴 𝓸𝓯 𝓐𝓷𝓼𝔀𝓮𝓻𝓼 / 答案之书")
+st.markdown("<div class='subtitle'>𝓕𝓸𝓬𝓾𝓼 𝓸𝓷 𝔂𝓸𝓾𝓻 𝓺𝓾𝓮𝓼𝓽𝓲𝓸𝓷... 请在心中默念你的问题... ✨</div>", unsafe_allow_html=True)
 
 # Initialize Chat History
 if "messages" not in st.session_state:
@@ -229,26 +306,25 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # --- MAIN LOGIC ---
-if prompt := st.chat_input("Type your question here / 在此输入你的问题..."):
+if prompt := st.chat_input("𝓣𝔂𝓹𝓮 𝓼𝓸𝓶𝓮𝓽𝓱𝓲𝓷𝓰 𝓽𝓸 𝓼𝓽𝓪𝓻𝓽 / 在此输入你的问题..."):
     
     # 1. User Message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # 2. The Logic (Replicating n8n nodes)
+    # 2. The Logic
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # Simulate "Focusing" (The Wait Node in n8n)
-        with st.spinner("Consulting the spirits... / 正在连接命运..."):
+        # Simulate "Focusing"
+        with st.spinner("✨ 𝓒𝓸𝓷𝓼𝓾𝓵𝓽𝓲𝓷𝓰 𝓽𝓱𝓮 𝓼𝓽𝓪𝓻𝓼... / 正在连接宇宙能量..."):
             time.sleep(1.5) 
             
-            # Step A: Get Random Answer (The Python Code Node)
+            # Get Random Answer
             random_answer = random.choice(answers)
             
-            # Step B: LLM Analysis (The AI Agent Node)
-            # Replicating the exact system prompt from your n8n workflow
+            # LLM Analysis
             system_prompt = f"""
             You are the "Oracle Interpreter" (命运解读者).
             Your task is to take the user's [Question] and the random [Book Answer] they received, and generate a spiritual analysis report.
