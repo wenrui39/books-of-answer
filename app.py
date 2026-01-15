@@ -255,43 +255,59 @@ if 'css_code' not in locals():
 
     /* --- 6. CHAT INTERFACE BEAUTIFICATION (FIXED) --- */
     
-    /* 1. 隐藏 Streamlit 底部容器原本的背景色 (去除黑色长方形) */
     div[data-testid="stBottom"] {
-        background-color: transparent !important;
         background: transparent !important;
-        border: none !important;
+        background-color: transparent !important;
+        border-top: none !important;
         box-shadow: none !important;
     }
 
-    /* 2. 重置输入框容器，防止位置偏移 */
+    /* 2. 调整输入框容器位置，使其悬浮 */
     .stChatInput {
-        padding-bottom: 20px !important;
+        padding-bottom: 30px !important; /* 距离底部留出空间 */
+        padding-top: 0 !important;
     }
 
-    /* 3. 美化输入框本体 (修复文字挤压) */
+    /* 3. 输入框本体设计：Gemini 风格 (胶囊状、极简、微透明) */
     .stChatInput textarea {
-        background-color: rgba(0, 0, 0, 0.5) !important; /* 半透明黑底 */
-        backdrop-filter: blur(10px); /* 毛玻璃 */
-        border: 1px solid rgba(0, 255, 255, 0.3) !important; /* 青色边框 */
-        border-radius: 25px !important;
-        color: #fff !important;
-        font-family: 'Orbitron', sans-serif !important;
+        /* 背景：深灰半透明，类似毛玻璃，融入星空但清晰可见 */
+        background-color: rgba(20, 23, 25, 0.7) !important; 
+        backdrop-filter: blur(8px); /* 增加高级感 */
         
-        /* 关键修复：调整内边距，让文字不被挤压 */
-        padding: 10px 15px !important; 
-        line-height: 1.5 !important;
+        /* 边框：极细的灰白线，显得精致 */
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        
+        /* 形状：完全圆润的胶囊 */
+        border-radius: 28px !important; 
+        
+        /* 文字 */
+        color: #E3E3E3 !important;
+        font-family: 'Bricolage Grotesque', sans-serif !important;
+        font-size: 16px !important;
+        
+        /* 内边距：让文字不贴边 */
+        padding: 12px 20px !important; 
+        
+        /* 阴影：微弱的浮起感 */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
     }
 
-    /* 鼠标悬停/选中时的效果 */
+    /* 4. 鼠标点击/输入时的状态 */
     .stChatInput textarea:focus {
-        background-color: rgba(0, 0, 0, 0.7) !important;
-        border-color: #00ffff !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        background-color: rgba(20, 23, 25, 0.9) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important; /* 聚焦时边框变亮 */
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* 5. 隐藏右上角的发送按钮 (可选，Gemini通常回车发送，如果你想保留按钮，可以删掉这一段) */
+    /* 如果你想保留按钮但要好看点，就不要复制下面这三行，或者告诉我微调按钮 */
+    button[data-testid="stChatInputSubmitButton"] {
+        display: none !important; /* 这里隐藏了按钮，让界面更像纯文本框 */
     }
     
-    /* 隐藏输入框右下角的字符计数器 (如果有的话，保持界面干净) */
+    /* 6. 隐藏输入框右下角的字符计数 */
     div[data-testid="InputInstructions"] {
-        display: none;
+        display: none !important;
     }
 </style>
 """
