@@ -317,7 +317,7 @@ if 'css_code' not in locals():
         display: flex !important;
         position: absolute !important;
         /* 【关键修改：距离调整】离右边框 20px，不再贴边 */
-        right: 50px !important; 
+        right: 35px !important; 
         top: 50% !important;
         transform: translateY(-50%) !important;
         
