@@ -3,102 +3,146 @@ import random
 import time
 from groq import Groq
 
-# --- 1. SECRETS & CONFIGURATION ---
+# --- 1. CONFIGURATION ---
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except (FileNotFoundError, KeyError):
     # Placeholder for local testing
     GROQ_API_KEY = "gsk_..." 
-    # st.stop() # Uncomment this in production
+    # st.stop()
 
 client = Groq(api_key=GROQ_API_KEY)
 
 # --- 2. PAGE SETUP ---
 st.set_page_config(page_title="Book of Answers", page_icon="🌠", layout="wide")
 
-# --- 3. ANIMATION ENGINE (FIXED) ---
-# 🛠️ BUG FIX: We generate the HTML as a single line to prevent Streamlit 
-# from mistakenly treating it as a "Code Block" (the text you saw on screen).
-meteor_html = ""
-for i in range(25):  # Increased to 25 meteors
-    top_pos = random.randint(0, 100) 
-    left_pos = random.randint(0, 100) 
-    delay = random.uniform(0, 10)     # Faster cycle
-    duration = random.uniform(2, 4)   # Faster speed
+# --- 3. INJECT CUSTOM HTML BACKGROUND ---
+# This is the content from your 'html.html' file, optimized for Streamlit
+# We use standard <img> tags for the stars and inline SVGs for the icons.
+background_html = """
+<div id="starry-section--background" aria-hidden="true">
+    <img class="starry-section--background--stars" id="stars1" src="https://cdn.jsdelivr.net/gh/KyleSchullerDEV/CodePenStorage/images/starry.svg">
+    <img class="starry-section--background--stars" id="stars2" src="https://cdn.jsdelivr.net/gh/KyleSchullerDEV/CodePenStorage/images/starry.svg">
+    <img class="starry-section--background--stars" id="stars3" src="https://cdn.jsdelivr.net/gh/KyleSchullerDEV/CodePenStorage/images/starry.svg">
     
-    # CSS Inline string - No newlines, No indentation
-    meteor_html += f'<span class="meteor" style="top: {top_pos}vh; left: {left_pos}vw; animation-delay: {delay}s; animation-duration: {duration}s;"></span>'
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="icon ufo">
+        <path fill="currentColor" d="M320 288c124.2 0 176-50.9 176-50.9c0-8.3-.6-16.5-1.7-24.5C582 235.5 640 275 640 320c0 70.7-143.3 128-320 128S0 390.7 0 320c0-45 58-84.5 145.7-107.4c-1.2 8-1.7 16.2-1.7 24.5c0 0 51.8 50.9 176 50.9zm24 88a24 24 0 1 0 -48 0 24 24 0 1 0 48 0zM128 352a24 24 0 1 0 0-48 24 24 0 1 0 0 48zm408-24a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z"/><path fill="#7dd3fc" opacity="0.4" d="M496 237.1s-51.8 50.9-176 50.9s-176-50.9-176-50.9C144 141.5 222.8 64 320 64s176 77.5 176 173.1z"/>
+    </svg>
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon planet">
+        <path fill="#c2410c" d="M408.3 114.3C370.3 73.5 316.1 48 256 48C141.1 48 48 141.1 48 256c0 60.1 25.5 114.3 66.3 152.3c58.5-37.6 111.3-85 160.1-133.8s96.3-101.7 133.8-160.1zm38 57.5c-32.6 46-75.8 97.1-126.6 147.9s-101.8 94-147.9 126.6C197.6 457.7 226 464 256 464c114.9 0 208-93.1 208-208c0-30-6.3-58.4-17.7-84.2z"/><path fill="#fb923c" d="M503.9 8.1c35.2 35.2-47.3 174.7-184.2 311.6S43.3 539.1 8.1 503.9c-22.1-22.1 2.3-85.6 57.6-163.7c9.1 20.7 21.8 40.2 38 57.5c-5.7 8.8-11.1 17.8-16.3 26.9c69.3-39.6 130.8-94 187-150.1s110.6-117.7 150.1-187c-9.1 5.2-18 10.6-26.9 16.3c-17.4-16.2-36.9-28.9-57.5-38C418.3 10.4 481.7-14 503.9 8.1z"/>
+    </svg>
+</div>
+"""
 
-# --- 4. VISUALS (CSS) ---
+# --- 4. INJECT CSS STYLES ---
+# This is your 'cssdesign.css' CONVERTED from SCSS to standard CSS
+# I also adjusted 'z-index' and 'position' so it stays behind your chat app.
 st.markdown(f"""
 <style>
+    /* 1. IMPORT FONTS */
     @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Orbitron:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,200..800&display=swap');
 
-    /* FORCE DARK BACKGROUND */
+    /* 2. RESET STREAMLIT DEFAULTS */
     .stApp {{
-        background: black !important; /* Pure black for contrast */
-        color: #fff !important;
+        background: transparent !important;
     }}
-    
-    /* Hide default elements */
     header, .stDeployButton, footer {{visibility: hidden;}}
 
-    /* STAR ANIMATIONS */
-    /* Layer 1: Small & Slow */
-    .stars {{
-        position: fixed; top: 0; left: 0; width: 2px; height: 2px;
-        background: white;
-        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(400)])};
-        animation: animStar 50s linear infinite;
-        z-index: 0;
+    /* 3. BACKGROUND CONTAINER STYLE */
+    #starry-section--background {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(150deg, #0f172a, #1c1917);
+        overflow: hidden;
+        z-index: -1; /* Puts it BEHIND the chat */
+        display: grid;
+        place-items: center;
+        grid-template-areas: "StarStack";
     }}
     
-    /* Layer 2: Medium & Faster */
-    .stars2 {{
-        position: fixed; top: 0; left: 0; width: 3px; height: 3px;
-        background: white;
-        box-shadow: {", ".join([f"{random.randint(0, 2000)}px {random.randint(0, 2000)}px #FFF" for _ in range(150)])};
-        animation: animStar 30s linear infinite;
-        z-index: 0;
+    #starry-section--background > * {{
+        grid-area: StarStack;
     }}
 
-    @keyframes animStar {{
-        from {{ transform: translateY(0px); opacity: 0.9; }}
-        to {{ transform: translateY(-2000px); opacity: 1; }}
+    /* 4. STARS ANIMATION */
+    .starry-section--background--stars {{
+        /* Calculated from your SCSS variables */
+        --stars-dimensions: 1.77; 
+        width: 100vw; 
+        height: auto;
+        min-height: 100vh;
+        object-fit: cover;
+        opacity: 0.7;
     }}
 
-    /* METEORS (Shooting Stars) - BRIGHTER & THICKER */
-    .meteor {{
-        position: fixed;
-        opacity: 0;
-        width: 300px; height: 3px; /* Thicker */
-        background: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
-        transform: rotate(-45deg);
-        z-index: 0;
-        animation: meteor-fall linear infinite;
-        pointer-events: none;
-        box-shadow: 0 0 20px 2px #fff; /* Glow effect */
+    /* Individual Star Layers with offsets */
+    #stars1 {{
+        --star-offset: 120vh;
+        animation: moveStars 40s infinite linear alternate;
+    }}
+    #stars2 {{
+        --star-offset: 180vh;
+        animation: moveStars 45s infinite linear alternate;
+        opacity: 0.5;
+    }}
+    #stars3 {{
+        --star-offset: 240vh;
+        animation: moveStars 50s infinite linear alternate;
+        opacity: 0.3;
     }}
 
-    @keyframes meteor-fall {{
-        0% {{ opacity: 1; margin-top: -300px; margin-right: -300px; }}
-        10% {{ opacity: 0; }}
-        100% {{ opacity: 0; }}
+    @keyframes moveStars {{
+        0% {{ transform: translateX(-10%); }}
+        100% {{ transform: translateX(10%); }}
     }}
 
-    /* NEON TITLE */
+    /* 5. ICONS ANIMATION (UFO & PLANET) */
+    .icon {{
+        color: white;
+        z-index: 2;
+        position: absolute;
+    }}
+
+    /* UFO Style */
+    .icon.ufo {{
+        width: 80px;
+        top: 10vh;
+        animation: moveUfo 24s infinite linear alternate;
+    }}
+
+    /* Planet Style */
+    .icon.planet {{
+        width: 150px;
+        bottom: 5vh;
+        animation: movePlanet 30s infinite linear alternate;
+    }}
+
+    @keyframes moveUfo {{
+        0% {{ transform: translateX(120vw); }}
+        100% {{ transform: translateX(-120vw); }}
+    }}
+
+    @keyframes movePlanet {{
+        0% {{ transform: translateX(-80vw) rotate(0deg); }}
+        100% {{ transform: translateX(80vw) rotate(20deg); }}
+    }}
+
+    /* 6. NEON TEXT STYLES (Kept from your original request) */
     .neon-title {{
         font-family: 'Orbitron', sans-serif;
-        font-size: 50px; /* Adjusted size for mobile/web balance */
+        font-size: 50px;
         text-align: center;
         margin-top: 60px;
         color: #fff;
         text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #0ff, 0 0 40px #0ff;
         animation: neon-pulse 2s infinite alternate;
-        position: relative;
-        z-index: 2;
     }}
-
+    
     @keyframes neon-pulse {{
         from {{ text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0ff; opacity: 1; }}
         to {{ text-shadow: 0 0 2px #fff, 0 0 5px #fff, 0 0 10px #0ff; opacity: 0.8; }}
@@ -110,37 +154,26 @@ st.markdown(f"""
         color: rgba(255, 255, 255, 0.9);
         text-align: center;
         margin-bottom: 20px;
-        position: relative;
-        z-index: 2;
     }}
     
-    /* INPUT BOX STYLING */
+    /* Input Box Styling */
     .stChatInput textarea {{
         background-color: rgba(20, 20, 20, 0.8) !important;
         color: white !important;
         border: 1px solid #0ff !important;
         border-radius: 20px;
     }}
-
-    .background-container {{
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 0;
-        pointer-events: none;
-    }}
 </style>
-
-<div class="background-container">
-    <div class="stars"></div>
-    <div class="stars2"></div>
-    {meteor_html}
-</div>
-
-<div class="neon-title">The Book of Answers<br><span style="font-size:24px">答案之书</span></div>
-<div class="instruction-text">Type something to start... / 请输入文字开启...</div>
 """, unsafe_allow_html=True)
 
-# --- 5. LOGIC & ANSWERS ---
+# --- 5. RENDER BACKGROUND ---
+st.markdown(background_html, unsafe_allow_html=True)
+
+# --- 6. TITLE & LOGIC ---
+st.markdown('<div class="neon-title">The Book of Answers<br><span style="font-size:24px">答案之书</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="instruction-text">Type something to start... / 请输入文字开启...</div>', unsafe_allow_html=True)
+
+# --- ANSWERS LOGIC ---
 answers = [
     "Yes / 是的", "Absolutely / 绝对是", "Count on it / 你可以指望它", 
     "It is certain / 这是肯定的", "The outcome will surprise you / 结果会让你惊讶",
