@@ -19,7 +19,7 @@ answers = [
     "It is certain / 这是肯定的", "The outcome will surprise you / 结果会让你惊讶",
     "It is worth the struggle / 值得去争取", "This is a sure thing / 这是一个确定的事情",
     "Go for it / 试一试", "You will succeed / 你会成功的", "Luck is on your side / 幸运女神站在你这边",
-    "A definitive yes / 毫无疑问的"是"", "Signs point to yes / 迹象表明是肯定的",
+    "A definitive yes / 毫无疑问的“是”", "Signs point to yes / 迹象表明是肯定的",
     
     # Negative / Cautionary
     "No / 不", "Don't bet on it / 不要押注于此", "You will regret it / 你会后悔的",
